@@ -1,70 +1,11 @@
 # Clean Slate
 ## Windows
 * create: `C:\stuff`, `C:\stuff\PATH`, `C:\github`, `C:\github\<OTHER_ACC_NAME>` ve `C:\github\onuralp-t`
-
 ### Remember to download
 * Soulseek - peer to peer music sharing platform
 * yt-dlp && ffmpeg
 * w64devkit https://github.com/skeeto/w64devkit - unbeatable gcc toolchain
-
-## Github
-### Create SSH keys
-* create the keys for each acc: (passkey not required)
-```
-cd ~/.ssh
-ssh-keygen -t ed25519 -C "onuralp-t" -f id_ed25519_onuralp-t
-ssh-keygen -t ed25519 -C "<OTHER_ACC_NAME>" -f id_ed25519_<OTHER_ACC_NAME>
-```
-* create .gitconfig and .gitconfig_<OTHER_ACC_NAME> in user's folder, could add other ones as well
-```
-cd ~/
-touch .gitconfig
-touch .gitconfig_<OTHER_ACC_NAME>
-```
-* inside .gitconfig:
-```
-[user]
-    name = onuralp-t
-    email = 149798217+onuralp-t@users.noreply.github.com
-[core]
-    sshCommand = "ssh -i ~/.ssh/id_ed25519_onuralp-t"
-[includeIf "gitdir:C:/github/<OTHER_ACC_NAME>/"]
-    path = .gitconfig-<OTHER_ACC_NAME>
-[init]
-	defaultBranch = main
-```
-* inside .gitconfig_<OTHER_ACC_NAME>:
-```
-[user]
-    name = <OTHER_ACC_NAME>
-    email = 15321351+<OTHER_ACC_NAME>@users.noreply.github.com
-[core]
-    sshCommand = "ssh -i ~/.ssh/id_ed25519_<OTHER_ACC_NAME>"
-[init]
-	defaultBranch = main
-```
-* Bu setup için `C:\github`, `C:\github\<OTHER_ACC_NAME>` ve `C:\github\onuralp-t` dosyalarını oluşturdum. global .gitconfig dosyasındaki includeIf satırı sayesinde directory ismine göre farklı configlerin yüklenmesi sağlanabiliyor.
-* git attribution kısmında yanlışlıkla kişisel emailini sızdırmamak için Github -> email settings'de github'ın bize assignladığı noreply emailini kopyalayıp buradaki credentials'a ekledim.
-* Github'da "private email leakleniyorsa commit'i engelle" ayarını açtım, bu setup ile düzgün çalışıyor.
-
-## VSCode
-### VSCode settings
-* VSCode Keyboard Shortcuts -> Terminal:Create New == CTRL + N `{ "key": "ctrl+n", "command": "workbench.action.terminal.new"}`
-* VSCode -> terminal: Select default profile -> Windows Powershell
-### VSCode alias
-* save following file as `c.bat` and add it to PATH:
-```
-@echo off
-
-cd /d %CD%
-
-code .
-exit
-```
-* find `code.cmd` inside VSCode directory, add `start "" ` to the beginning of the `"%~dp0..\Code.exe" "%~dp0..\resources\app\out\cli.js" %*` line to prevent empty terminal opening when `c.bat` is called
-* DONE: type `c` in cmd terminal and vscode opens in current dir.
-
-## Powershell
+### Powershell
 * local script yürütmeye izin vermek için powershell terminali açıp komutu yürüt `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`
 *  `notepad $PROFILE` ile `$PROFILE` dosyasını editle, değişiklik yaptıktan sonra dosyayı kaydet, ve yeni terminal aç ya da `. $PROFILE` ile refresh'le
     * `$PROFILE` yoksa `New-Item -ItemType File -Path $PROFILE -Force` yürüt ve tekrar dene
@@ -157,7 +98,63 @@ echo "    git push -f origin main"
 }
 ```
 
-## Code Runner
+## Github
+### Create SSH keys
+* create the keys for each acc: (passkey not required)
+```
+cd ~/.ssh
+ssh-keygen -t ed25519 -C "onuralp-t" -f id_ed25519_onuralp-t
+ssh-keygen -t ed25519 -C "<OTHER_ACC_NAME>" -f id_ed25519_<OTHER_ACC_NAME>
+```
+* create .gitconfig and .gitconfig_<OTHER_ACC_NAME> in user's folder, could add other ones as well
+```
+cd ~/
+touch .gitconfig
+touch .gitconfig_<OTHER_ACC_NAME>
+```
+* inside .gitconfig:
+```
+[user]
+    name = onuralp-t
+    email = 149798217+onuralp-t@users.noreply.github.com
+[core]
+    sshCommand = "ssh -i ~/.ssh/id_ed25519_onuralp-t"
+[includeIf "gitdir:C:/github/<OTHER_ACC_NAME>/"]
+    path = .gitconfig-<OTHER_ACC_NAME>
+[init]
+	defaultBranch = main
+```
+* inside .gitconfig_<OTHER_ACC_NAME>:
+```
+[user]
+    name = <OTHER_ACC_NAME>
+    email = 15321351+<OTHER_ACC_NAME>@users.noreply.github.com
+[core]
+    sshCommand = "ssh -i ~/.ssh/id_ed25519_<OTHER_ACC_NAME>"
+[init]
+	defaultBranch = main
+```
+* Bu setup için `C:\github`, `C:\github\<OTHER_ACC_NAME>` ve `C:\github\onuralp-t` dosyalarını oluşturdum. global .gitconfig dosyasındaki includeIf satırı sayesinde directory ismine göre farklı configlerin yüklenmesi sağlanabiliyor.
+* git attribution kısmında yanlışlıkla kişisel emailini sızdırmamak için Github -> email settings'de github'ın bize assignladığı noreply emailini kopyalayıp buradaki credentials'a ekledim.
+* Github'da "private email leakleniyorsa commit'i engelle" ayarını açtım, bu setup ile düzgün çalışıyor.
+
+## VSCode
+### VSCode settings
+* VSCode Keyboard Shortcuts -> Terminal:Create New == CTRL + N `{ "key": "ctrl+n", "command": "workbench.action.terminal.new"}`
+* VSCode -> terminal: Select default profile -> Windows Powershell
+### VSCode alias
+* save following file as `c.bat` and add it to PATH:
+```
+@echo off
+
+cd /d %CD%
+
+code .
+exit
+```
+* find `code.cmd` inside VSCode directory, add `start "" ` to the beginning of the `"%~dp0..\Code.exe" "%~dp0..\resources\app\out\cli.js" %*` line to prevent empty terminal opening when `c.bat` is called
+* DONE: type `c` in cmd terminal and vscode opens in current dir.
+### Code Runner
 
 * [Code Runner](https://marketplace.visualstudio.com/items?itemName=formulahendry.code-runner)
 * VSCode Keyboard Shortcuts -> Run Code == CTRL + B `{"key": "ctrl+b", "command": "code-runner.run"}`
@@ -204,6 +201,10 @@ echo .^\%2.exe
 
 :eof
 ```
+
+
+
+
 
 # MISC
 
