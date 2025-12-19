@@ -1,0 +1,132 @@
+html,
+body {
+    padding: 0;
+    margin: 0;
+}
+
+/* ############################################################ */
+.page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+}
+
+.content {
+    flex: 1;
+    /* to move footer to bottom of page by filling middle */
+}
+
+.header {
+    display: flex;
+    flex-direction: row;
+
+    justify-content: center;
+    align-items: center;
+}
+
+.footer {
+    display: flex;
+    flex-direction: row;
+
+    justify-content: center;
+    align-items: center;
+}
+
+/* ############################################################ */
+
+.vertical {
+    display: flex;
+    flex-direction: column;
+}
+
+.horizontal {
+    display: flex;
+    flex-direction: row;
+
+    justify-content: center;
+    align-items: center;
+}
+
+/* ############################################################ */
+.header {
+    background-color: #333;
+}
+
+.footer {
+    background-color: #333;
+}
+
+.content {
+    background-color: rgb(241, 254, 227);
+}
+
+.link {
+    color: white;
+}
+
+.link:hover {
+    color: #ffabab;
+}
+
+.link:active {
+    color: #ff7777;
+}
+
+.list_element::marker{
+    color: #c8aef3;
+}
+
+.list_container {
+    border-color: black;
+}
+
+/* ############################################################ */
+
+.header {
+    block-size: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    padding-right: 3rem;
+    padding-left: 3rem;
+}
+
+.footer {
+    block-size: 1rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    padding-right: 3rem;
+    padding-left: 3rem;
+}
+
+.header .link,
+.footer .link {
+    margin: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* ############################################################ */
+
+.link {
+    text-decoration: none;
+    transition: color 0.5s ease;
+}
+
+.list_title {
+    font-size: 1.5rem;
+    font-weight: bolder;
+}
+
+.list_element {
+    margin-left: 1rem;
+    display: list-item;
+    list-style-type: square;
+}
+
+.list_container {
+    border-style: solid;
+    border-width: 0.1rem;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin: 1rem;
+}
