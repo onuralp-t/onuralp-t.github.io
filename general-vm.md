@@ -24,7 +24,7 @@ sudo apt install git nginx ufw nano -y
 ```bash
 sudo apt remove --purge firewalld iptables-persistent netfilter-persistent -y && \
 sudo ufw limit ssh && \
-sudo ufw allow 80,8080,443/tcp && \
+sudo ufw allow 80,443/tcp && \
 sudo iptables -P INPUT ACCEPT && \
 sudo iptables -P FORWARD ACCEPT && \
 sudo iptables -P OUTPUT ACCEPT && \
