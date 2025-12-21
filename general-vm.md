@@ -12,6 +12,11 @@ $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule $per
 $acl.AddAccessRule($accessRule)
 Set-Acl $path $acl
 ```
+## ssh command
+* Change key filename and ephemeral IP and run:
+```bash
+ssh -i ssh-key-2025-12-21.key ubuntu@141.144.232.250
+```
 # Inside the VM
 ## before doing other things
 ```bash
