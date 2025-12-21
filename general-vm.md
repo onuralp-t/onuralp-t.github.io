@@ -1,5 +1,5 @@
 * [go back to README](README.md)
-# pre-ssh
+# pre-ssh, key file permission issue fix
 * In cases where you download ssh keys from Oracle, the file permissions are messed up. If in linux we could've just done `chmod 600 <file>` but Windows requires the following.
 * Open an elevated powershell terminal and paste the whole thing, multiline, after changing the `$path`.
 ```ps1
@@ -12,13 +12,14 @@ $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule $per
 $acl.AddAccessRule($accessRule)
 Set-Acl $path $acl
 ```
-# Basics
+# Inside the VM
+## before doing other things
 ```bash
 sudo apt update -y && \
 sudo apt upgrade -y && \
 sudo apt install git nginx ufw nano -y
 ```
-## Firewall
+## Firewall migration to 'ufw'
 * Copy the whole block and paste it. This removes all firewall managers, installs ufw, enables ports 80, 443 and 8080 for tcp and allows ssh with a ratelimit, then migrates to ufw.
 ```bash
 sudo apt remove --purge firewalld iptables-persistent netfilter-persistent -y && \
