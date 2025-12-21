@@ -36,3 +36,10 @@ sudo ip6tables -X && \
 sudo ufw --force enable && \
 sudo ufw status verbose
 ```
+* To delete rule, run `sudo ufw delete allow 80,443/tcp`.
+## git setup
+* Add the public key to your Github account via settings.
+```bash
+ssh-keygen -t ed25519 -C "github/onuralp-t" -f ~/.ssh/id_ed25519
+ssh -T git@github.com
+```
