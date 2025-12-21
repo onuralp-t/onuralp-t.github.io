@@ -58,3 +58,8 @@ To                         Action      From
 ssh-keygen -t ed25519 -C "github/onuralp-t" -f ~/.ssh/id_ed25519
 ssh -T git@github.com
 ```
+
+# Web design
+## WASM development
+### nginx and WASM
+### sqlite3 WASM module
