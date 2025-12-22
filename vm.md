@@ -58,6 +58,10 @@ To                         Action      From
 ssh-keygen -t ed25519 -C "github/onuralp-t" -f ~/.ssh/id_ed25519
 ssh -T git@github.com
 ```
+## upgrading from nano to micro, with micro text editor
+* https://github.com/zyedidia/micro#installation
+* `curl https://getmic.ro | bash` gets the prebuilt binary in current directory.
+* `sudo mv micro /usr/bin` moves the binary to a dir on PATH.
 
 # Web design
 ## WASM development
