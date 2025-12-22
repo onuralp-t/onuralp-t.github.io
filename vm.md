@@ -62,6 +62,7 @@ ssh -T git@github.com
 * https://github.com/zyedidia/micro#installation
 * `curl https://getmic.ro | bash` gets the prebuilt binary in current directory.
 * `sudo mv micro /usr/bin` moves the binary to a dir on PATH.
+* Micro clipboard issue potential fix, install xclip, https://old.reddit.com/r/linux/comments/x1p07u/what_are_your_thougths_of_micro_editor/imgfbhk/
 
 # Web design
 ## WASM development
