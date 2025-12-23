@@ -63,6 +63,14 @@ ssh -T git@github.com
 * `curl https://getmic.ro | bash` gets the prebuilt binary in current directory.
 * `sudo mv micro /usr/bin` moves the binary to a dir on PATH.
 * Micro clipboard issue potential fix, install xclip, https://old.reddit.com/r/linux/comments/x1p07u/what_are_your_thougths_of_micro_editor/imgfbhk/
+## using tmux to have persistent process in server
+| Action | Command / Shortcut |
+| :--- | :--- |
+| **Start named session** | `tmux new -s <name>` |
+| **Detach (leave running)** | Press `Ctrl`+`b`, release, then press `d` |
+| **List sessions** | `tmux ls` |
+| **Attach to session** | `tmux attach -t <name>` |
+| **Kill session** | `tmux kill-session -t <name>` |
 
 # Web design
 ## WASM development
