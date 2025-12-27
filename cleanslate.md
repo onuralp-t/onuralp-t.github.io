@@ -143,6 +143,20 @@ touch .gitconfig_<OTHER_ACC_NAME>
 ### VSCode settings
 * VSCode Keyboard Shortcuts -> Terminal:Create New == CTRL + N `{ "key": "ctrl+n", "command": "workbench.action.terminal.new"}`
 * VSCode -> terminal: Select default profile -> Windows Powershell
+### clangd
+* Add the following to `settings.json`, change w64devkit path if necessary.
+```json
+    "clangd.arguments": [
+        "--log=verbose",
+        "--query-driver=C:\\stuff\\w64devkit\\bin\\*",
+        "--inlay-hints=false"
+    ],
+    "clangd.fallbackFlags": [
+        "--target=x86_64-w64-mingw32",
+        "-IC:\\stuff\\w64devkit\\include"
+    ],
+    "editor.inlayHints.enabled": "off"
+```
 ### VSCode alias
 * save following file as `c.bat` and add it to PATH:
 ```
