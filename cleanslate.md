@@ -157,6 +157,9 @@ touch .gitconfig_<OTHER_ACC_NAME>
     ],
     "editor.inlayHints.enabled": "off"
 ```
+### Intel VTune Profiler
+* Need to install debug info for windows dlls to get function names and stuff.
+* https://www.intel.com/content/www/us/en/docs/vtune-profiler/user-guide/2024-2/debug-information-for-windows-system-libraries.html#STD
 ### VSCode alias
 * save following file as `c.bat` and add it to PATH:
 ```
