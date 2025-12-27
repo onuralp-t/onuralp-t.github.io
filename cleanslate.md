@@ -6,6 +6,9 @@
 * Soulseek - peer to peer music sharing platform
 * yt-dlp && ffmpeg
 * w64devkit https://github.com/skeeto/w64devkit - unbeatable gcc toolchain
+#### Intel VTune Profiler
+* Need to install debug info for windows dlls to get function names and stuff.
+* https://www.intel.com/content/www/us/en/docs/vtune-profiler/user-guide/2024-2/debug-information-for-windows-system-libraries.html#STD
 ### Powershell
 * local script yürütmeye izin vermek için powershell terminali açıp komutu yürüt `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`
 *  `notepad $PROFILE` ile `$PROFILE` dosyasını editle, değişiklik yaptıktan sonra dosyayı kaydet, ve yeni terminal aç ya da `. $PROFILE` ile refresh'le
@@ -143,8 +146,8 @@ touch .gitconfig_<OTHER_ACC_NAME>
 ### VSCode settings
 * VSCode Keyboard Shortcuts -> Terminal:Create New == CTRL + N `{ "key": "ctrl+n", "command": "workbench.action.terminal.new"}`
 * VSCode -> terminal: Select default profile -> Windows Powershell
-### clangd
-* Add the following to `settings.json`, change w64devkit path if necessary.
+### clangd VSCode setup
+* Add the following to VSCODE `settings.json`, change w64devkit path if necessary.
 ```json
     "clangd.arguments": [
         "--log=verbose",
@@ -157,9 +160,6 @@ touch .gitconfig_<OTHER_ACC_NAME>
     ],
     "editor.inlayHints.enabled": "off"
 ```
-### Intel VTune Profiler
-* Need to install debug info for windows dlls to get function names and stuff.
-* https://www.intel.com/content/www/us/en/docs/vtune-profiler/user-guide/2024-2/debug-information-for-windows-system-libraries.html#STD
 ### VSCode alias
 * save following file as `c.bat` and add it to PATH:
 ```
