@@ -8,7 +8,8 @@
 * w64devkit https://github.com/skeeto/w64devkit - unbeatable gcc toolchain
 #### Intel VTune Profiler
 * Need to install debug info for windows dlls to get function names and stuff.
-* https://www.intel.com/content/www/us/en/docs/vtune-profiler/user-guide/2024-2/debug-information-for-windows-system-libraries.html#STD
+* Create dir for debug info to live in, `C:\stuff\vtune_win_debug`
+* Define environment variable `_NT_SYMBOL_PATH` = `srv*C:\stuff\vtune_win_debug*http://msdl.microsoft.com/download/symbols`
 ### Powershell
 * local script yürütmeye izin vermek için powershell terminali açıp komutu yürüt `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser`
 *  `notepad $PROFILE` ile `$PROFILE` dosyasını editle, değişiklik yaptıktan sonra dosyayı kaydet, ve yeni terminal aç ya da `. $PROFILE` ile refresh'le
@@ -187,35 +188,17 @@ exit
 * coderunnerthingy.bat:
 ```
 @echo off
-
-if "%1"=="" (
-    echo Please provide a compiler name.
-    echo Example: mybat.bat gcc
-    goto :eof
-)
-
-if "%2"=="" (
-    echo Please provide a name after the script name.
-    echo Example: mybat.bat Alice
-    goto :eof
-)
-
-if "%3"=="" (
-    echo Please provide a name w ext after the script name.
-    echo Example: mybat.bat Alice.c
-    goto :eof
-)
-
 > %2.bat (
 echo @echo off
 echo.
-echo set before_flags^= -O0 -ggdb3
+echo set flags= -O3 -ggdb3
+echo.
+echo set linking= 
 echo.
 echo @echo on
-echo %1 %%before_flags%% -o %2.exe %3
 echo.
-echo .^\%2.exe
+echo %1 %%flags%% -o %2.exe %3 %%linking%% ^&^& .^\%2.exe ^&^& del .^\%2.exe
+echo.
+echo :: %1 %%flags%% -o %2.exe %3 %%linking%% ^&^& .^\%2.exe
 )
-
-:eof
 ```
