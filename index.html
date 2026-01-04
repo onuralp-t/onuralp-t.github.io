@@ -43,6 +43,7 @@
                             const time_days_e = document.getElementById("time_days");
                             const sum_e = document.getElementById("sum");
                             const gain_e = document.getElementById("gain");
+                            const gain_per_day_e = document.getElementById("gain_per_day");
 
                             window.onload = function() {
                                 if (localStorage.getItem("yearly_percentage")) {
@@ -71,24 +72,26 @@
                                 localStorage.setItem("yearly_percentage", yearly_percentage_e.value);
                                 localStorage.setItem("balance", balance_e.value);
                                 localStorage.setItem("time_days", time_days_e.value);
+                                
 
                                 // Validation: If any input is empty/not a number, stop
                                 if (isNaN(yearly_percentage) || isNaN(balance) || isNaN(time_days)) {
                                     sum_e.innerText = "0.00";
                                     gain_e.innerText = "0.00";
+                                    gain_per_day_e.innerText = "0.00";
                                     return;
                                 }
 
                                 // Calculation logic
                                 const fraction_added = Math.pow((1 + (yearly_percentage / 36500)), time_days) - 1;
-                                
+
                                 const totalSum = balance * (fraction_added + 1);
                                 const totalGain = totalSum - balance;
 
                                 // Display results
                                 sum_e.innerText = totalSum.toFixed(2);
                                 gain_e.innerText = totalGain.toFixed(2);
-                                document.getElementById("gain_per_day").innerText = (totalGain / time_days).toFixed(2);
+                                gain_per_day_e.innerText = (totalGain / time_days).toFixed(2);
                             }
                         </script>
                     </div>
