@@ -33,8 +33,9 @@
                         <label for="time_days">Enter time period in days:</label>
                         <input type="number" id="time_days" placeholder="0.00">
 
-                        <div>Sum == <span id="sum"></span>₺</div>
-                        <div>Gain == <span id="gain"></span>₺</div>
+                        <div>Sum: <span id="sum"></span>₺</div>
+                        <div>Total gain: <span id="gain"></span>₺</div>
+                        <div>Gain per day: <span id="gain_per_day"></span>₺</div>
                         
                         <script>
                             const yearly_percentage_e = document.getElementById("yearly_percentage");
@@ -87,6 +88,7 @@
                                 // Display results
                                 sum_e.innerText = totalSum.toFixed(2);
                                 gain_e.innerText = totalGain.toFixed(2);
+                                document.getElementById("gain_per_day").innerText = (totalGain / time_days).toFixed(2);
                             }
                         </script>
                     </div>
