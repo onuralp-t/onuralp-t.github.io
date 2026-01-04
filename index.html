@@ -35,7 +35,8 @@
 
                         <div>Sum: <span id="sum"></span>₺</div>
                         <div>Total gain: <span id="gain"></span>₺</div>
-                        <div>Gain per day: <span id="gain_per_day"></span>₺</div>
+                        <div>Daily gain at start: <span id="daily_gain_start"></span>₺</div>
+                        <div>Daily gain at end: <span id="daily_gain_end"></span>₺</div>
                         
                         <script>
                             const yearly_percentage_e = document.getElementById("yearly_percentage");
@@ -43,7 +44,8 @@
                             const time_days_e = document.getElementById("time_days");
                             const sum_e = document.getElementById("sum");
                             const gain_e = document.getElementById("gain");
-                            const gain_per_day_e = document.getElementById("gain_per_day");
+                            const daily_gain_start_e = document.getElementById("daily_gain_start");
+                            const daily_gain_end_e = document.getElementById("daily_gain_end");
 
                             window.onload = function() {
                                 if (localStorage.getItem("yearly_percentage")) {
@@ -78,7 +80,7 @@
                                 if (isNaN(yearly_percentage) || isNaN(balance) || isNaN(time_days)) {
                                     sum_e.innerText = "0.00";
                                     gain_e.innerText = "0.00";
-                                    gain_per_day_e.innerText = "0.00";
+                                    gain_per_day_start_e.innerText = "0.00";
                                     return;
                                 }
 
@@ -91,7 +93,8 @@
                                 // Display results
                                 sum_e.innerText = totalSum.toFixed(2);
                                 gain_e.innerText = totalGain.toFixed(2);
-                                gain_per_day_e.innerText = (totalGain / time_days).toFixed(2);
+                                daily_gain_start_e.innerText = ((yearly_percentage / 36500) * balance).toFixed(2);
+                                daily_gain_end_e.innerText = ((yearly_percentage / 36500) * Number(sum_e.innerText)).toFixed(2);
                             }
                         </script>
                     </div>
