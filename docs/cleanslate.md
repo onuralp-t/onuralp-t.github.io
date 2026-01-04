@@ -1,4 +1,3 @@
-* [go back to README](README.md)
 # Clean Slate
 ## Windows
 * create: `C:\stuff`, `C:\stuff\PATH`, `C:\github`, `C:\github\<OTHER_ACC_NAME>` ve `C:\github\onuralp-t`
