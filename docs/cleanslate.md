@@ -107,6 +107,7 @@ echo "    git push -f origin main"
 * create the keys for each acc: (passkey not required)
 ```
 cd ~/.ssh
+ssh-keygen -t ed25519 # create a default key with default names, bare ssh login outside of GIT will use this by default, useful for pasting this as your public key to OCI so you don't have to type in the key all the time
 ssh-keygen -t ed25519 -C "onuralp-t" -f id_ed25519_onuralp-t
 ssh-keygen -t ed25519 -C "<OTHER_ACC_NAME>" -f id_ed25519_<OTHER_ACC_NAME>
 ```
@@ -114,29 +115,27 @@ ssh-keygen -t ed25519 -C "<OTHER_ACC_NAME>" -f id_ed25519_<OTHER_ACC_NAME>
 ```
 cd ~/
 touch .gitconfig
-touch .gitconfig_<OTHER_ACC_NAME>
+touch .gitconfig_<ACC_NAME1>
+touch .gitconfig_<ACC_NAME2>
 ```
 * inside .gitconfig:
 ```
-[user]
-    name = onuralp-t
-    email = 149798217+onuralp-t@users.noreply.github.com
-[core]
-    sshCommand = "ssh -i ~/.ssh/id_ed25519_onuralp-t"
-[includeIf "gitdir:C:/github/<OTHER_ACC_NAME>/"]
-    path = .gitconfig-<OTHER_ACC_NAME>
 [init]
 	defaultBranch = main
+
+[includeIf "gitdir:C:/github/bardiel73/"]
+    path = .gitconfig-bardiel73
+[includeIf "gitdir:C:/github/onuralp-t/"]
+    path = .gitconfig-onuralp-t
+
 ```
 * inside .gitconfig_<OTHER_ACC_NAME>:
 ```
 [user]
-    name = <OTHER_ACC_NAME>
-    email = 15321351+<OTHER_ACC_NAME>@users.noreply.github.com
+    name = NAME
+    email = EMAIL
 [core]
-    sshCommand = "ssh -i ~/.ssh/id_ed25519_<OTHER_ACC_NAME>"
-[init]
-	defaultBranch = main
+    sshCommand = "ssh -i ~/.ssh/PRIVATEKEY"
 ```
 * Bu setup için `C:\github`, `C:\github\<OTHER_ACC_NAME>` ve `C:\github\onuralp-t` dosyalarını oluşturdum. global .gitconfig dosyasındaki includeIf satırı sayesinde directory ismine göre farklı configlerin yüklenmesi sağlanabiliyor.
 * git attribution kısmında yanlışlıkla kişisel emailini sızdırmamak için Github -> email settings'de github'ın bize assignladığı noreply emailini kopyalayıp buradaki credentials'a ekledim.
