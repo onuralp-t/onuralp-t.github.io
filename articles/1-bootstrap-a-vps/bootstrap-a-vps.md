@@ -7,7 +7,7 @@ They also have an `Always Free` indicator that can assure you that you won't get
 - Google Cloud Compute used to be my choice, but they recently stopped giving away free public IP's, so hosting small web servers on free-tier Google VPS's became no longer possible. Also not being able to put payment limits was always annoying.
 
 # Meta settings for the Cloud Compute Provider
-- Network: As a general rule, you should start with only allowing network ingress/egress traffic to your VPS through standard HTTP(S) ports 80 and 443. You should set this up at the cloud-layer through your VPS's subnet settings, and we will set up these firewall rules inside the VPS itself as well.
+- Network: As a general rule, you should start with only allowing network ingress/egress traffic to your VPS through standard HTTP(S) ports 80 and 443, and SSH traffic through port 22. You should set this up at the cloud-layer through your VPS's subnet settings, and we will set up these firewall rules inside the VPS itself as well.
 - SSH/keys: When setting up the network portion of your VPS in OCI, you get the option to have OCI make the SSH keys for you, and download the SSH keys to your machine. This allows you to connect to your VPS via your SSH keys, foregoing more insecure plaintext password authentication schemes. A small note, when you download the keys from OCI, you need to set up their permissions correctly.
 
 # Inside the VPS
