@@ -259,6 +259,51 @@ a:hover {
   padding: 0;
 }
 
+/* Let highlight.js theme colors through, keep our container style */
+.article-body pre code.hljs {
+  background: transparent;
+  padding: 0;
+}
+
+/* Code block copy button */
+.article-body pre {
+  position: relative;
+}
+
+.code-copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  font-family: var(--font-sans);
+  color: var(--text-muted);
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+  z-index: 1;
+}
+
+.article-body pre:hover .code-copy-btn {
+  opacity: 1;
+}
+
+.code-copy-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--active-bg);
+}
+
+/* Search highlight */
+mark.search-highlight {
+  background-color: rgba(255, 213, 79, 0.3);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
 /* Substack-Style Centered Figures & Images */
 .article-body figure.article-figure {
   margin: 2.5rem auto;
