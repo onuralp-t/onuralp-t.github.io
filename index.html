@@ -26,7 +26,11 @@
       <nav aria-label="Articles">
         <div class="sidebar-heading">Articles</div>
         <ul class="article-list" id="articles-nav">
-          <li class="article-list-item active" id="nav-art-1" data-order="1" data-title="Bootstrap a VPS">
+          <li class="article-list-item active" id="nav-art-2" data-order="2" data-title="Hello SQLite, Hello WASM, Hello everyone">
+            <span class="order-badge">#2</span>
+            <a class="article-list-link" href="#article-2-how-to-wasm" onclick="selectArticle(2)">Hello SQLite, Hello WASM, Hello everyone</a>
+          </li>
+          <li class="article-list-item" id="nav-art-1" data-order="1" data-title="Bootstrap a VPS">
             <span class="order-badge">#1</span>
             <a class="article-list-link" href="#article-1-bootstrap-a-vps" onclick="selectArticle(1)">Bootstrap a VPS</a>
           </li>
@@ -35,6 +39,111 @@
     </aside>
 
     <main class="main-stream" id="articles-stream">
+      <article class="article-card" id="article-2-how-to-wasm" data-order="2" data-title="Hello SQLite, Hello WASM, Hello everyone">
+        <div class="article-body">
+<h1 id="art-2-hello-sqlite-hello-wasm-hello-everyone" class="article-heading"><a class="heading-anchor" href="#art-2-hello-sqlite-hello-wasm-hello-everyone" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-2-hello-sqlite-hello-wasm-hello-everyone')">&sect;</a>Hello SQLite, Hello WASM, Hello everyone</h1>
+<p>This article will describe the workings of <a href="https://github.com/onuralp-t/hello-sqlite-wasm">this repo of mine</a>, and what is necessary to serve a static website on Github Pages that uses SQLite's WASM build; moving the high-level explanation from code comments to, hopefully, where it makes more sense.</p>
+<h1 id="art-2-before-we-even-start-cors-and-wasm" class="article-heading"><a class="heading-anchor" href="#art-2-before-we-even-start-cors-and-wasm" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-2-before-we-even-start-cors-and-wasm')">&sect;</a>Before we even start: CORS and WASM</h1>
+<p>To load in WASM binaries, you need to be in a cross origin isolated context. Usually this is not a problem, but because I use Github Pages to host the website in my repo, and because Github doesn't give users enough control to set these kinds of headers, we need to fix this CORS issue in another way.</p>
+<p>We need COOP and COEP HTTP headers set like:</p>
+<pre><code>Cross-Origin-Embedder-Policy: require-corp
+Cross-Origin-Opener-Policy: same-origin
+</code></pre>
+<p>Luckily, we're not the first one to encounter this problem, and there's this hack: <a href="https://github.com/gzuidhof/coi-serviceworker">https://github.com/gzuidhof/coi-serviceworker</a> , thank you gzuidhof.</p>
+<h1 id="art-2-whats-going-on-in-the-main-thread-in-indexhtml" class="article-heading"><a class="heading-anchor" href="#art-2-whats-going-on-in-the-main-thread-in-indexhtml" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-2-whats-going-on-in-the-main-thread-in-indexhtml')">&sect;</a>What's going on in the main thread in index.html?</h1>
+<p>At the top, we have our message_types: the types of messages that we can send between our worker and main thread.</p>
+<pre><code class="language-js">    const message_types = Object.freeze({
+        MAIN_ENTER_TEXT: 0,
+        MAIN_CLEAR_DB: 1,
+        WORKER_DB_CONTENTS: 2,
+    });
+</code></pre>
+<p>Currently, I manually define this struct in both main and the worker, which is kind of a stupid implementation, but I didn't want to create another <code>common.js</code> to include in both main and worker files, to keep things simple.</p>
+<p>After creating the worker, we define when the main thread will send which messages to the worker thread, and with what payload.</p>
+<pre><code class="language-js">    const worker = new Worker('my-sqlite-worker.js');
+
+    user_input.addEventListener('keydown', e =&gt; {
+        if (e.key === 'Enter' &amp;&amp; user_input.value) {
+        worker.postMessage({type: message_types.MAIN_ENTER_TEXT, payload: user_input.value});
+        user_input.value = '';
+        }
+    });
+
+    clear_db_button.addEventListener('click', e =&gt; {
+        worker.postMessage({type: message_types.MAIN_CLEAR_DB, payload: 0});
+    })
+</code></pre>
+<p>Then, we define how the main thread will handle incomming messages from the worker thread.</p>
+<pre><code class="language-js">    worker.onmessage = e =&gt; {
+        switch(e.data.type)
+        {
+            case message_types.WORKER_DB_CONTENTS:
+            {
+                let htmlstr = "";
+                for (row of e.data.payload) {
+                    // console.log(row);
+                    htmlstr += `${row}&lt;br&gt;`;
+                }
+                db_contents.innerHTML = htmlstr;
+            } break;
+        }
+    };
+</code></pre>
+<h1 id="art-2-whats-going-on-in-the-worker-thread" class="article-heading"><a class="heading-anchor" href="#art-2-whats-going-on-in-the-worker-thread" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-2-whats-going-on-in-the-worker-thread')">&sect;</a>What's going on in the worker thread?</h1>
+<p>In <code>my-sqlite-worker.js</code>, we start by including the JavaScript release of the SQLite library, and create the same message struct I talked about earlier:</p>
+<pre><code class="language-js">importScripts("sqlite3.js");
+
+const message_types = Object.freeze({
+    MAIN_ENTER_TEXT: 0,
+    MAIN_CLEAR_DB: 1,
+    WORKER_DB_CONTENTS: 2,
+});
+</code></pre>
+<p>To initialize the database, we do:</p>
+<pre><code class="language-js">sqlite3InitModule().then(sqlite3 =&gt; {
+    const db = new sqlite3.oo1.OpfsDb('/test.db');
+    // ...
+</code></pre>
+<ul>
+<li>There are a <a href="https://sqlite.org/wasm/doc/trunk/persistence.md">couple of different ways</a> of achieving persistence when using sqlite-wasm. To write to disk, this little program uses the <a href="https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system">OPFS</a> (see: O stands for Origin).</li>
+</ul>
+<p>We create the table, and then a helper function to query everything from the table and send it to the main thread through a message, and then call the helper to send the initial state to main:</p>
+<pre><code class="language-js">db.exec('CREATE TABLE IF NOT EXISTS entries (text TEXT)');
+const send_db_to_main = () =&gt; {
+const db_contents = db.exec('SELECT * FROM entries', { returnValue: 'resultRows' });
+    self.postMessage({type: message_types.WORKER_DB_CONTENTS, payload: db_contents});
+};
+    
+send_db_to_main();
+</code></pre>
+<p>We then implement how we're gonna handle different messages that can come from main:</p>
+<pre><code class="language-js">self.onmessage = e =&gt; {
+    switch(e.data.type)
+	{
+    case message_types.MAIN_ENTER_TEXT:
+        {
+            sqlog(`message '${e.data.payload}' received...`);
+            db.exec({ sql: 'INSERT INTO entries (text) VALUES (?)', bind: [e.data.payload] });
+            sqlog(`message '${e.data.payload}' inserted...`);
+
+            const rows = db.exec('SELECT * FROM entries', { returnValue: 'resultRows' });
+            send_db_to_main();
+        } break;
+
+        case message_types.MAIN_CLEAR_DB:
+        {
+            sqlog("MAIN_CLEAR_DB msg received...");
+            db.exec({ sql: 'DELETE FROM entries' });
+            send_db_to_main();
+        } break;
+    } // switch(e.data.type)
+}; // self.onmessage
+}); // sqlite3InitModule().then
+</code></pre>
+
+        </div>
+      </article>
+
       <article class="article-card" id="article-1-bootstrap-a-vps" data-order="1" data-title="Bootstrap a VPS">
         <div class="article-body">
 <h1 id="art-1-bootstrap-a-vps" class="article-heading"><a class="heading-anchor" href="#art-1-bootstrap-a-vps" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-1-bootstrap-a-vps')">&sect;</a>Bootstrap a VPS</h1>
@@ -167,7 +276,25 @@ EOF
     <aside class="sidebar-outline">
       <div class="sidebar-heading">Outline</div>
       <div class="outline-container" id="outline-container">
-        <div class="article-outline-block active" id="outline-art-1">
+        <div class="article-outline-block active" id="outline-art-2">
+          <div class="outline-item level-1">
+            <a class="outline-link" href="#art-2-hello-sqlite-hello-wasm-hello-everyone">Hello SQLite, Hello WASM, Hello everyone</a>
+            <button class="outline-copy-btn" onclick="copyHeadingUrl(event, 'art-2-hello-sqlite-hello-wasm-hello-everyone')" title="Copy link to section">&#x2398;</button>
+          </div>
+          <div class="outline-item level-1">
+            <a class="outline-link" href="#art-2-before-we-even-start-cors-and-wasm">Before we even start: CORS and WASM</a>
+            <button class="outline-copy-btn" onclick="copyHeadingUrl(event, 'art-2-before-we-even-start-cors-and-wasm')" title="Copy link to section">&#x2398;</button>
+          </div>
+          <div class="outline-item level-1">
+            <a class="outline-link" href="#art-2-whats-going-on-in-the-main-thread-in-indexhtml">What's going on in the main thread in index.html?</a>
+            <button class="outline-copy-btn" onclick="copyHeadingUrl(event, 'art-2-whats-going-on-in-the-main-thread-in-indexhtml')" title="Copy link to section">&#x2398;</button>
+          </div>
+          <div class="outline-item level-1">
+            <a class="outline-link" href="#art-2-whats-going-on-in-the-worker-thread">What's going on in the worker thread?</a>
+            <button class="outline-copy-btn" onclick="copyHeadingUrl(event, 'art-2-whats-going-on-in-the-worker-thread')" title="Copy link to section">&#x2398;</button>
+          </div>
+        </div>
+        <div class="article-outline-block" id="outline-art-1">
           <div class="outline-item level-1">
             <a class="outline-link" href="#art-1-bootstrap-a-vps">Bootstrap a VPS</a>
             <button class="outline-copy-btn" onclick="copyHeadingUrl(event, 'art-1-bootstrap-a-vps')" title="Copy link to section">&#x2398;</button>

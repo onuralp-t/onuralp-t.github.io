@@ -11,7 +11,7 @@ Cross-Origin-Opener-Policy: same-origin
 ```
 Luckily, we're not the first one to encounter this problem, and there's this hack: https://github.com/gzuidhof/coi-serviceworker , thank you gzuidhof.
 
-# What's going on in the main thread i.e. in index.html?
+# What's going on in the main thread in index.html?
 At the top, we have our message_types: the types of messages that we can send between our worker and main thread.
 ```js
     const message_types = Object.freeze({

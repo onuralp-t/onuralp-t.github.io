@@ -8,6 +8,7 @@
   --bg-tertiary: #202024;
   --text-primary: #f2f2f4;
   --text-secondary: #c8c8cc;
+  --text-link: #ffc4f9;
   --text-muted: #828288;
   --border-color: #26262a;
   --border-subtle: #1c1c20;
@@ -224,6 +225,10 @@ a:hover {
 
 .article-body li {
   margin-bottom: 0.35rem;
+}
+
+.article-body a {
+    color: var(--text-link);
 }
 
 .article-body blockquote {
