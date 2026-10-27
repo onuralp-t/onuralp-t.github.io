@@ -1,0 +1,4 @@
+*.exe
+src/md2html
+src/site_generator
+src/test_site_generator

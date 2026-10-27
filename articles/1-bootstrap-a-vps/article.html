@@ -1,0 +1,121 @@
+<h1 id="bootstrap-a-vps">Bootstrap a VPS</h1>
+<h1 id="choosing-a-cloud-compute-provider">Choosing a Cloud Compute provider</h1>
+<p>Choose Oracle's free-tier VPS. They offer 1 vCPU, 1 GB RAM, 200 GB SSD and a public IP for free, though it's not static IP at free tier. This is enough to host a website for your personal project.</p>
+<p>They also have an <code>Always Free</code> indicator that can assure you that you won't get charged if you stay in the always free tier. Account validation is a bit cumbersome as they ask for bunch of PII and also ask you to pay a nominal fee which they send you back as a way of identity verification.</p>
+<ul>
+<li>Google Cloud Compute used to be my choice, but they recently stopped giving away free public ip's, so hosting small web servers on free-tier Google VPS's became no longer possible. Also not being able to put payment limits was always annoying.</li>
+</ul>
+<h1 id="meta-settings-for-the-cloud-compute-provider">Meta settings for the Cloud Compute Provider</h1>
+<ul>
+<li>Network: As a general rule, you should start with only allowing network ingress/egress traffic to your VPS through standard HTTP(S) ports 80 and 443. You should set this up at the cloud-layer through your VPS's subnet settings, and we will set up these firewall rules inside the VPS itself as well.</li>
+<li>SSH/keys: When setting up the network portion of your VPS in OCI, you get the option to have OCI make the SSH keys for you, and download the SSH keys to your machine. This allows you to connect to your VPS via your SSH keys, foregoing more insecure plaintext password authentication schemes. A small note, when you download the keys from OCI, you need to set up their permissions correctly.</li>
+</ul>
+<h1 id="inside-the-vps">Inside the VPS</h1>
+<p>If you try to do a full system upgrade like <code>sudo apt update -y &amp;&amp; sudo apt upgrade -y</code>, you will most likely stall to an almost complete stop and proceed very slowly because of the inadequacies of 1 GB of system RAM. Setting up swap memory and then update/upgrading is usually a solid first start.</p>
+<h2 id="setting-up-swap-and-upgrading">Setting up swap and Upgrading</h2>
+<p>Create 4GB of swap file, fix permissions, make swap, turn swap on, adjust swappiness for low RAM system.</p>
+<pre><code class="language-sh">sudo fallocate -l 4G /swapfile &amp;&amp; \
+sudo chmod 600 /swapfile &amp;&amp; \
+sudo mkswap /swapfile &amp;&amp; \
+sudo swapon /swapfile &amp;&amp; \
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab &amp;&amp; \
+sudo sysctl vm.swappiness=5 &amp;&amp; \
+echo 'vm.swappiness=5' | sudo tee -a /etc/sysctl.conf &amp;&amp; \
+sudo apt update -y &amp;&amp; sudo apt upgrade -y &amp;&amp; sudo apt autoremove -y &amp;&amp; sudo apt install build-essential git micro ufw -y
+</code></pre>
+<h2 id="migrate-firewall-to-ufw">Migrate firewall to UFW</h2>
+<p>UFW has a simple and easy to use interface, and it's my preference for configuring firewall inside a Linux system, though these commands below are easily adaptable to other systems.</p>
+<p>A common beginner mishap is improperly migrating to a different firewall system and blocking yourself out of your VPS by disallowing foreign connections (including your own connection). To mitigate this, directly copy-pasting the below command so every command runs sequentially is advised. (see: <code>sudo ufw limit ssh</code>)</p>
+<pre><code class="language-sh">sudo apt remove --purge firewalld iptables-persistent netfilter-persistent -y &amp;&amp; \
+sudo ufw limit ssh &amp;&amp; \
+sudo ufw allow 80,443/tcp &amp;&amp; \
+sudo ufw allow 80,443/udp &amp;&amp; \
+sudo iptables -P INPUT ACCEPT &amp;&amp; \
+sudo iptables -P FORWARD ACCEPT &amp;&amp; \
+sudo iptables -P OUTPUT ACCEPT &amp;&amp; \
+sudo iptables -F &amp;&amp; \
+sudo iptables -X &amp;&amp; \
+sudo ip6tables -F &amp;&amp; \
+sudo ip6tables -X &amp;&amp; \
+sudo ufw --force enable &amp;&amp; \
+sudo ufw status verbose
+</code></pre>
+<ul>
+<li>To delete a rule, you can run <code>sudo ufw delete allow 80,443/tcp</code></li>
+</ul>
+<h2 id="disable-plaintext-password-ssh-connection-attempts">Disable plaintext password SSH connection attempts</h2>
+<p>Don't set up an easy password thinking nobody would bother touching your site. All public websites get malicious traffic, and you have to expect and defend against them. Disabling plaintext password makes it so you can only enable an SSH connection to your VPS</p>
+<pre><code class="language-sh">sudo micro /etc/ssh/sshd_config
+# make sure these parameters are set as such:
+# PasswordAuthentication no
+sudo sshd -t
+sudo systemctl restart ssh
+</code></pre>
+<h2 id="set-up-git">Set up Git</h2>
+<p>When setting up git, there are these 6 - 7 commands that I have to look up whenever I'm in a fresh environment, so here they are.</p>
+<pre><code class="language-sh">ssh-keygen -t ed25519 &amp;&amp; \
+git config --global gpg.format ssh &amp;&amp; \
+git config --global user.signingkey "~/.ssh/id_ed25519.pub" &amp;&amp; \
+git config --global commit.gpgsign true &amp;&amp; \
+git config --global user.email "149798217+onuralp-t@users.noreply.github.com" &amp;&amp; \
+git config --global user.name "onuralp-t" &amp;&amp; \
+echo "$(git config --global user.email) $(cat ~/.ssh/id_ed25519.pub)" &gt;&gt; ~/.ssh/allowed_signers
+</code></pre>
+<h2 id="optional-pretty-prompt">Optional: pretty prompt</h2>
+<p>I like pretty prompts, and default bash prompt is pretty ugly and unergonomic for non-experts. I tried zsh and fish but didn't like them much. So I decided to just prettify the existing bash setup and add some functionality. This is a basic setup that I like:</p>
+<pre><code class="language-sh">sudo apt install -y fzf bash-completion &amp;&amp; \
+curl -sS https://starship.rs/install.sh | sh
+</code></pre>
+<pre><code class="language-sh">cat &lt;&lt; 'EOF' &gt; ~/.inputrc
+set completion-ignore-case On
+set show-all-if-ambiguous On
+set completion-map-case On
+set colored-stats On
+TAB: menu-complete
+# Shift-Tab to cycle backwards
+"\e[Z": menu-complete-backward
+EOF
+</code></pre>
+<pre><code class="language-sh">cat &lt;&lt; 'EOF' &gt; ~/.config/starship.toml
+add_newline = false
+[line_break]
+disabled = true
+
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+
+[directory]
+truncation_length = 3
+truncate_to_repo = true
+style = "bold cyan"
+
+[git_branch]
+format = "[$branch]($style) "
+style = "bold purple"
+
+[git_status]
+format = '([$all_status$ahead_behind]($style) )'
+style = "red"
+EOF
+</code></pre>
+<pre><code class="language-sh">cat &lt;&lt; 'EOF' &gt; ~/.bashrc
+# If not running interactively, don't do anything
+[[ $- != *i* ]] &amp;&amp; return
+
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+
+if [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+elif [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+fi
+
+if command -v fzf &amp;&gt;/dev/null; then
+    eval "$(fzf --bash)"
+fi
+
+eval "$(starship init bash)"
+EOF
+</code></pre>
