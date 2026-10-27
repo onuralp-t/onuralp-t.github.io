@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
   <title>Notes &amp; Articles</title>
   <link rel="stylesheet" href="assets/style.css">
   <link rel="stylesheet" href="assets/highlight-dark.min.css">
@@ -45,7 +46,7 @@
 </ul>
 <h1 id="art-1-meta-settings-for-the-cloud-compute-provider" class="article-heading"><a class="heading-anchor" href="#art-1-meta-settings-for-the-cloud-compute-provider" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-1-meta-settings-for-the-cloud-compute-provider')">&sect;</a>Meta settings for the Cloud Compute Provider</h1>
 <ul>
-<li>Network: As a general rule, you should start with only allowing network ingress/egress traffic to your VPS through standard HTTP(S) ports 80 and 443. You should set this up at the cloud-layer through your VPS's subnet settings, and we will set up these firewall rules inside the VPS itself as well.</li>
+<li>Network: As a general rule, you should start with only allowing network ingress/egress traffic to your VPS through standard HTTP(S) ports 80 and 443, and SSH traffic through port 22. You should set this up at the cloud-layer through your VPS's subnet settings, and we will set up these firewall rules inside the VPS itself as well.</li>
 <li>SSH/keys: When setting up the network portion of your VPS in OCI, you get the option to have OCI make the SSH keys for you, and download the SSH keys to your machine. This allows you to connect to your VPS via your SSH keys, foregoing more insecure plaintext password authentication schemes. A small note, when you download the keys from OCI, you need to set up their permissions correctly.</li>
 </ul>
 <h1 id="art-1-inside-the-vps" class="article-heading"><a class="heading-anchor" href="#art-1-inside-the-vps" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-1-inside-the-vps')">&sect;</a>Inside the VPS</h1>

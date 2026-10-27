@@ -784,6 +784,7 @@ int generate_site(const char *articles_dir, const char *output_file) {
         "<head>\n"
         "  <meta charset=\"UTF-8\">\n"
         "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n"
+        "  <link rel=\"icon\" type=\"image/x-icon\" href=\"./assets/favicon.ico\">\n"
         "  <title>Notes &amp; Articles</title>\n"
         "  <link rel=\"stylesheet\" href=\"assets/style.css\">\n"
         "  <link rel=\"stylesheet\" href=\"assets/highlight-dark.min.css\">\n"
