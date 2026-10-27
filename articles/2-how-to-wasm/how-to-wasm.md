@@ -47,7 +47,6 @@ Then, we define how the main thread will handle incomming messages from the work
             {
                 let htmlstr = "";
                 for (row of e.data.payload) {
-                    // console.log(row);
                     htmlstr += `${row}<br>`;
                 }
                 db_contents.innerHTML = htmlstr;
@@ -94,17 +93,13 @@ self.onmessage = e => {
 	{
     case message_types.MAIN_ENTER_TEXT:
         {
-            sqlog(`message '${e.data.payload}' received...`);
             db.exec({ sql: 'INSERT INTO entries (text) VALUES (?)', bind: [e.data.payload] });
-            sqlog(`message '${e.data.payload}' inserted...`);
-
             const rows = db.exec('SELECT * FROM entries', { returnValue: 'resultRows' });
             send_db_to_main();
         } break;
 
         case message_types.MAIN_CLEAR_DB:
         {
-            sqlog("MAIN_CLEAR_DB msg received...");
             db.exec({ sql: 'DELETE FROM entries' });
             send_db_to_main();
         } break;
