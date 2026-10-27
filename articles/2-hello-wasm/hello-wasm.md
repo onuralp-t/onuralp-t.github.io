@@ -1,4 +1,4 @@
-# Hello SQLite, Hello WASM, Hello everyone
+# Hello WASM, Hello SQLite, Hello everyone!
 This article will describe the workings of [this repo of mine](https://github.com/onuralp-t/hello-sqlite-wasm), and what is necessary to serve a static website on Github Pages that uses SQLite's WASM build; moving the high-level explanation from code comments to, hopefully, where it makes more sense.
 
 # Before we even start: CORS and WASM
