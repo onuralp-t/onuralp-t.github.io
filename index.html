@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Notes &amp; Articles</title>
   <link rel="stylesheet" href="assets/style.css">
-  <script src="assets/htmx.min.js"></script>
+  <link rel="stylesheet" href="assets/highlight-dark.min.css">
+  <script src="assets/highlight.min.js"></script>
 </head>
 <body id="top">
   <div class="layout-container">
@@ -16,22 +17,9 @@
 
       <div>
         <input type="search" id="article-filter" class="filter-input"
-               placeholder="Filter..."
+               placeholder="Search articles..."
                autocomplete="off"
-               hx-on:input="
-                 const q = this.value.trim().toLowerCase();
-                 document.querySelectorAll('.article-card').forEach(el => {
-                   const title = (el.dataset.title || '').toLowerCase();
-                   const text = el.innerText.toLowerCase();
-                   const matched = q === '' || title.includes(q) || text.includes(q);
-                   el.style.display = matched ? '' : 'none';
-                 });
-                 document.querySelectorAll('.article-list-item').forEach(el => {
-                   const title = (el.dataset.title || '').toLowerCase();
-                   const matched = q === '' || title.includes(q);
-                   el.style.display = matched ? '' : 'none';
-                 });
-               ">
+               oninput="handleSearch(this.value)">
       </div>
 
       <nav aria-label="Articles">
@@ -53,7 +41,7 @@
 <p>Choose Oracle's free-tier VPS. They offer 1 vCPU, 1 GB RAM, 200 GB SSD and a public IP for free, though it's not static IP at free tier. This is enough to host a website for your personal project.</p>
 <p>They also have an <code>Always Free</code> indicator that can assure you that you won't get charged if you stay in the always free tier. Account validation is a bit cumbersome as they ask for bunch of PII and also ask you to pay a nominal fee which they send you back as a way of identity verification.</p>
 <ul>
-<li>Google Cloud Compute used to be my choice, but they recently stopped giving away free public ip's, so hosting small web servers on free-tier Google VPS's became no longer possible. Also not being able to put payment limits was always annoying.</li>
+<li>Google Cloud Compute used to be my choice, but they recently stopped giving away free public IP's, so hosting small web servers on free-tier Google VPS's became no longer possible. Also not being able to put payment limits was always annoying.</li>
 </ul>
 <h1 id="art-1-meta-settings-for-the-cloud-compute-provider" class="article-heading"><a class="heading-anchor" href="#art-1-meta-settings-for-the-cloud-compute-provider" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-1-meta-settings-for-the-cloud-compute-provider')">&sect;</a>Meta settings for the Cloud Compute Provider</h1>
 <ul>
@@ -258,6 +246,89 @@ EOF
       });
     }, { rootMargin: '-20% 0px -70% 0px' });
     document.querySelectorAll('.article-card').forEach(card => observer.observe(card));
+
+    /* Syntax highlighting */
+    hljs.highlightAll();
+
+    /* Copy button on code blocks */
+    document.querySelectorAll('pre > code').forEach(block => {
+      const wrapper = block.parentElement;
+      wrapper.style.position = 'relative';
+      const btn = document.createElement('button');
+      btn.className = 'code-copy-btn';
+      btn.textContent = 'Copy';
+      btn.addEventListener('click', () => {
+        navigator.clipboard.writeText(block.textContent).then(() => {
+          btn.textContent = 'Copied!';
+          setTimeout(() => btn.textContent = 'Copy', 1500);
+        }).catch(() => {
+          showToast('Failed to copy');
+        });
+      });
+      wrapper.appendChild(btn);
+    });
+
+    /* Full-text search with word highlighting */
+    function handleSearch(value) {
+      const q = value.trim().toLowerCase();
+      document.querySelectorAll('mark.search-highlight').forEach(m => {
+        const parent = m.parentNode;
+        parent.replaceChild(document.createTextNode(m.textContent), m);
+        parent.normalize();
+      });
+      document.querySelectorAll('.article-card').forEach(card => {
+        const text = card.innerText.toLowerCase();
+        const matched = q === '' || text.includes(q);
+        card.style.display = matched ? '' : 'none';
+        if (matched && q !== '') {
+          highlightText(card.querySelector('.article-body'), q);
+        }
+      });
+      document.querySelectorAll('.article-list-item').forEach(el => {
+        const order = el.dataset.order;
+        const link = el.querySelector('.article-list-link');
+        const href = link ? link.getAttribute('href') : '';
+        const cardId = href ? href.substring(1) : '';
+        const card = cardId ? document.getElementById(cardId) : null;
+        const matched = q === '' || (card && card.style.display !== 'none');
+        el.style.display = matched ? '' : 'none';
+      });
+    }
+    function highlightText(root, query) {
+      if (!root) return;
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode: function(node) {
+          const p = node.parentElement;
+          if (!p) return NodeFilter.FILTER_REJECT;
+          const tag = p.tagName;
+          if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'MARK'
+              || tag === 'CODE' || tag === 'PRE') return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      });
+      const nodes = [];
+      while (walker.nextNode()) nodes.push(walker.currentNode);
+      nodes.forEach(function(node) {
+        const text = node.textContent;
+        const lower = text.toLowerCase();
+        const idx = lower.indexOf(query);
+        if (idx === -1) return;
+        const frag = document.createDocumentFragment();
+        let lastIdx = 0;
+        let pos = idx;
+        while (pos !== -1) {
+          frag.appendChild(document.createTextNode(text.slice(lastIdx, pos)));
+          const mark = document.createElement('mark');
+          mark.className = 'search-highlight';
+          mark.textContent = text.slice(pos, pos + query.length);
+          frag.appendChild(mark);
+          lastIdx = pos + query.length;
+          pos = lower.indexOf(query, lastIdx);
+        }
+        frag.appendChild(document.createTextNode(text.slice(lastIdx)));
+        node.parentNode.replaceChild(frag, node);
+      });
+    }
   </script>
 </body>
 </html>

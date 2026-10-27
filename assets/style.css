@@ -282,13 +282,9 @@ a:hover {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.15s ease, color 0.15s ease, background-color 0.15s ease;
   z-index: 1;
-}
-
-.article-body pre:hover .code-copy-btn {
-  opacity: 1;
 }
 
 .code-copy-btn:hover {

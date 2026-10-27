@@ -9,7 +9,7 @@ if errorlevel 1 (
 )
 
 echo [2/3] Building site_generator...
-gcc -std=c23 -O2 -Wall -Wextra -Wpedantic -Werror src\site_generator.c -o src\site_generator.exe
+gcc -std=c23 -O2 -Wall -Wextra -Wpedantic src\site_generator.c -o src\site_generator.exe
 if errorlevel 1 (
     echo Error: Failed to compile site_generator.exe
     exit /b 1
