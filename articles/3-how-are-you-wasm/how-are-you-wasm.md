@@ -1,5 +1,5 @@
 # From "Hello WASM" to "How are you, WASM!?"
-Check out [my article](https://onuralp-t.github.io/#article-2-how-to-wasm) for a WASM introductory text. In this article, we'll be moving on from "Hello WASM" to "How are you, WASM!?"
+Check out [my article](https://onuralp-t.github.io/#article-2-hello-wasm) for a WASM introductory text. In this article, we'll be moving on from "Hello WASM" to "How are you, WASM!?"
 
 Or to state it more clearly: we'll look into how WASM works on a fundamental level.
 # The WASM module
@@ -125,7 +125,7 @@ function wasm_log(c_str) {
   const wasm_compiled = await WebAssembly.instantiateStreaming(
     fetch("./main.wasm"),
     {
-      env: { wasm_log }, // define what WASM module asks for
+		env: { wasm_log }, // define what WASM module asks for
     },
 );
     const wasm = wasm_compiled.instance;
@@ -158,11 +158,11 @@ const imageData = new ImageData(screen_pixels, screen_width, screen_height);
 
 And for the grand finale, we define what is essentially a rendering loop. We create the equivalent of a `while(true)` loop that updates the WASM memory with WASM functions, and then uses a view onto the WASM memory to blit it to our HTML canvas, and then repeat:
 ```js
-	let frame = 0;
-	function loop() {
-    we.update(frame++); // update the screen_pixels data which lives in we.memory.buffer
-    ctx.putImageData(imageData, 0, 0); // imageData is a view on screen_pixels which is in we.memory.buffer
-    requestAnimationFrame(loop);
-	}
-	loop();
+let frame = 0;
+function loop() {
+we.update(frame++); // update the screen_pixels data which lives in we.memory.buffer
+ctx.putImageData(imageData, 0, 0); // imageData is a view on screen_pixels which is in we.memory.buffer
+requestAnimationFrame(loop);
+}
+loop();
 ```

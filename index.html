@@ -46,7 +46,7 @@
       <article class="article-card" id="article-3-how-are-you-wasm" data-order="3" data-title="From "Hello WASM" to "How are you, WASM!?"">
         <div class="article-body">
 <h1 id="art-3-from-hello-wasm-to-how-are-you-wasm" class="article-heading"><a class="heading-anchor" href="#art-3-from-hello-wasm-to-how-are-you-wasm" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-3-from-hello-wasm-to-how-are-you-wasm')">&sect;</a>From "Hello WASM" to "How are you, WASM!?"</h1>
-<p>Check out <a href="https://onuralp-t.github.io/#article-2-how-to-wasm">my article</a> for a WASM introductory text. In this article, we'll be moving on from "Hello WASM" to "How are you, WASM!?"</p>
+<p>Check out <a href="https://onuralp-t.github.io/#article-2-hello-wasm">my article</a> for a WASM introductory text. In this article, we'll be moving on from "Hello WASM" to "How are you, WASM!?"</p>
 <p>Or to state it more clearly: we'll look into how WASM works on a fundamental level.</p>
 <h1 id="art-3-the-wasm-module" class="article-heading"><a class="heading-anchor" href="#art-3-the-wasm-module" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-3-the-wasm-module')">&sect;</a>The WASM module</h1>
 <p>Before walking through how to include the WASM module into the web project, let's see what's inside the program that is going to be compiled into a WASM module in the first place.</p>
@@ -160,7 +160,7 @@ function wasm_log(c_str) {
   const wasm_compiled = await WebAssembly.instantiateStreaming(
     fetch("./main.wasm"),
     {
-      env: { wasm_log }, // define what WASM module asks for
+		env: { wasm_log }, // define what WASM module asks for
     },
 );
     const wasm = wasm_compiled.instance;
@@ -186,13 +186,13 @@ const { screen_width, screen_height, screen_pixels } = read_screen_from_wasm(we.
 <pre><code class="language-js">const imageData = new ImageData(screen_pixels, screen_width, screen_height);
 </code></pre>
 <p>And for the grand finale, we define what is essentially a rendering loop. We create the equivalent of a <code>while(true)</code> loop that updates the WASM memory with WASM functions, and then uses a view onto the WASM memory to blit it to our HTML canvas, and then repeat:</p>
-<pre><code class="language-js">	let frame = 0;
-	function loop() {
-    we.update(frame++); // update the screen_pixels data which lives in we.memory.buffer
-    ctx.putImageData(imageData, 0, 0); // imageData is a view on screen_pixels which is in we.memory.buffer
-    requestAnimationFrame(loop);
-	}
-	loop();
+<pre><code class="language-js">let frame = 0;
+function loop() {
+we.update(frame++); // update the screen_pixels data which lives in we.memory.buffer
+ctx.putImageData(imageData, 0, 0); // imageData is a view on screen_pixels which is in we.memory.buffer
+requestAnimationFrame(loop);
+}
+loop();
 </code></pre>
 
         </div>
@@ -211,41 +211,41 @@ Cross-Origin-Opener-Policy: same-origin
 <p>Luckily, we're not the first one to encounter this problem, and there's this hack: <a href="https://github.com/gzuidhof/coi-serviceworker">https://github.com/gzuidhof/coi-serviceworker</a> , thank you gzuidhof.</p>
 <h1 id="art-2-whats-going-on-in-the-main-thread-in-indexhtml" class="article-heading"><a class="heading-anchor" href="#art-2-whats-going-on-in-the-main-thread-in-indexhtml" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-2-whats-going-on-in-the-main-thread-in-indexhtml')">&sect;</a>What's going on in the main thread in index.html?</h1>
 <p>At the top, we have our message_types: the types of messages that we can send between our worker and main thread.</p>
-<pre><code class="language-js">    const message_types = Object.freeze({
-        MAIN_ENTER_TEXT: 0,
-        MAIN_CLEAR_DB: 1,
-        WORKER_DB_CONTENTS: 2,
-    });
+<pre><code class="language-js">const message_types = Object.freeze({
+    MAIN_ENTER_TEXT: 0,
+    MAIN_CLEAR_DB: 1,
+    WORKER_DB_CONTENTS: 2,
+});
 </code></pre>
 <p>Currently, I manually define this struct in both main and the worker, which is kind of a stupid implementation, but I didn't want to create another <code>common.js</code> to include in both main and worker files, to keep things simple.</p>
 <p>After creating the worker, we define when the main thread will send which messages to the worker thread, and with what payload.</p>
-<pre><code class="language-js">    const worker = new Worker('my-sqlite-worker.js');
+<pre><code class="language-js">const worker = new Worker('my-sqlite-worker.js');
 
-    user_input.addEventListener('keydown', e =&gt; {
-        if (e.key === 'Enter' &amp;&amp; user_input.value) {
-        worker.postMessage({type: message_types.MAIN_ENTER_TEXT, payload: user_input.value});
-        user_input.value = '';
-        }
-    });
+user_input.addEventListener('keydown', e =&gt; {
+    if (e.key === 'Enter' &amp;&amp; user_input.value) {
+    worker.postMessage({type: message_types.MAIN_ENTER_TEXT, payload: user_input.value});
+    user_input.value = '';
+    }
+});
 
-    clear_db_button.addEventListener('click', e =&gt; {
-        worker.postMessage({type: message_types.MAIN_CLEAR_DB, payload: 0});
-    })
+clear_db_button.addEventListener('click', e =&gt; {
+    worker.postMessage({type: message_types.MAIN_CLEAR_DB, payload: 0});
+})
 </code></pre>
 <p>Then, we define how the main thread will handle incomming messages from the worker thread.</p>
-<pre><code class="language-js">    worker.onmessage = e =&gt; {
-        switch(e.data.type)
+<pre><code class="language-js">worker.onmessage = e =&gt; {
+    switch(e.data.type)
+    {
+        case message_types.WORKER_DB_CONTENTS:
         {
-            case message_types.WORKER_DB_CONTENTS:
-            {
-                let htmlstr = "";
-                for (row of e.data.payload) {
-                    htmlstr += `${row}&lt;br&gt;`;
-                }
-                db_contents.innerHTML = htmlstr;
-            } break;
-        }
-    };
+            let htmlstr = "";
+            for (row of e.data.payload) {
+                htmlstr += `${row}&lt;br&gt;`;
+            }
+            db_contents.innerHTML = htmlstr;
+        } break;
+    }
+};
 </code></pre>
 <h1 id="art-2-whats-going-on-in-the-worker-thread" class="article-heading"><a class="heading-anchor" href="#art-2-whats-going-on-in-the-worker-thread" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-2-whats-going-on-in-the-worker-thread')">&sect;</a>What's going on in the worker thread?</h1>
 <p>In <code>my-sqlite-worker.js</code>, we start by including the JavaScript release of the SQLite library, and create the same message struct I talked about earlier:</p>

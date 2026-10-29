@@ -14,45 +14,45 @@ Luckily, we're not the first one to encounter this problem, and there's this hac
 # What's going on in the main thread in index.html?
 At the top, we have our message_types: the types of messages that we can send between our worker and main thread.
 ```js
-    const message_types = Object.freeze({
-        MAIN_ENTER_TEXT: 0,
-        MAIN_CLEAR_DB: 1,
-        WORKER_DB_CONTENTS: 2,
-    });
+const message_types = Object.freeze({
+    MAIN_ENTER_TEXT: 0,
+    MAIN_CLEAR_DB: 1,
+    WORKER_DB_CONTENTS: 2,
+});
 ```
 Currently, I manually define this struct in both main and the worker, which is kind of a stupid implementation, but I didn't want to create another `common.js` to include in both main and worker files, to keep things simple.
 
 After creating the worker, we define when the main thread will send which messages to the worker thread, and with what payload. 
 ```js
-    const worker = new Worker('my-sqlite-worker.js');
+const worker = new Worker('my-sqlite-worker.js');
 
-    user_input.addEventListener('keydown', e => {
-        if (e.key === 'Enter' && user_input.value) {
-        worker.postMessage({type: message_types.MAIN_ENTER_TEXT, payload: user_input.value});
-        user_input.value = '';
-        }
-    });
+user_input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && user_input.value) {
+    worker.postMessage({type: message_types.MAIN_ENTER_TEXT, payload: user_input.value});
+    user_input.value = '';
+    }
+});
 
-    clear_db_button.addEventListener('click', e => {
-        worker.postMessage({type: message_types.MAIN_CLEAR_DB, payload: 0});
-    })
+clear_db_button.addEventListener('click', e => {
+    worker.postMessage({type: message_types.MAIN_CLEAR_DB, payload: 0});
+})
 ```
 
 Then, we define how the main thread will handle incomming messages from the worker thread.
 ```js
-    worker.onmessage = e => {
-        switch(e.data.type)
+worker.onmessage = e => {
+    switch(e.data.type)
+    {
+        case message_types.WORKER_DB_CONTENTS:
         {
-            case message_types.WORKER_DB_CONTENTS:
-            {
-                let htmlstr = "";
-                for (row of e.data.payload) {
-                    htmlstr += `${row}<br>`;
-                }
-                db_contents.innerHTML = htmlstr;
-            } break;
-        }
-    };
+            let htmlstr = "";
+            for (row of e.data.payload) {
+                htmlstr += `${row}<br>`;
+            }
+            db_contents.innerHTML = htmlstr;
+        } break;
+    }
+};
 ```
 # What's going on in the worker thread?
 
