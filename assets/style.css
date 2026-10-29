@@ -275,6 +275,11 @@ a:hover {
   position: relative;
 }
 
+.article-body pre {
+    scrollbar-width: thin;
+    scrollbar-color: #3f3f46 transparent;
+}
+
 .code-copy-btn {
   position: absolute;
   top: 0.5rem;
