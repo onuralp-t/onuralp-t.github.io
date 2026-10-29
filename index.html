@@ -26,9 +26,13 @@
       <nav aria-label="Articles">
         <div class="sidebar-heading">Articles</div>
         <ul class="article-list" id="articles-nav">
-          <li class="article-list-item active" id="nav-art-2" data-order="2" data-title="Hello SQLite, Hello WASM, Hello everyone">
+          <li class="article-list-item active" id="nav-art-3" data-order="3" data-title="From "Hello WASM" to "How are you, WASM!?"">
+            <span class="order-badge">#3</span>
+            <a class="article-list-link" href="#article-3-how-are-you-wasm" onclick="selectArticle(3)">From "Hello WASM" to "How are you, WASM!?"</a>
+          </li>
+          <li class="article-list-item" id="nav-art-2" data-order="2" data-title="Hello WASM, Hello SQLite, Hello everyone!">
             <span class="order-badge">#2</span>
-            <a class="article-list-link" href="#article-2-how-to-wasm" onclick="selectArticle(2)">Hello SQLite, Hello WASM, Hello everyone</a>
+            <a class="article-list-link" href="#article-2-hello-wasm" onclick="selectArticle(2)">Hello WASM, Hello SQLite, Hello everyone!</a>
           </li>
           <li class="article-list-item" id="nav-art-1" data-order="1" data-title="Bootstrap a VPS">
             <span class="order-badge">#1</span>
@@ -39,9 +43,164 @@
     </aside>
 
     <main class="main-stream" id="articles-stream">
-      <article class="article-card" id="article-2-how-to-wasm" data-order="2" data-title="Hello SQLite, Hello WASM, Hello everyone">
+      <article class="article-card" id="article-3-how-are-you-wasm" data-order="3" data-title="From "Hello WASM" to "How are you, WASM!?"">
         <div class="article-body">
-<h1 id="art-2-hello-sqlite-hello-wasm-hello-everyone" class="article-heading"><a class="heading-anchor" href="#art-2-hello-sqlite-hello-wasm-hello-everyone" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-2-hello-sqlite-hello-wasm-hello-everyone')">&sect;</a>Hello SQLite, Hello WASM, Hello everyone</h1>
+<h1 id="art-3-from-hello-wasm-to-how-are-you-wasm" class="article-heading"><a class="heading-anchor" href="#art-3-from-hello-wasm-to-how-are-you-wasm" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-3-from-hello-wasm-to-how-are-you-wasm')">&sect;</a>From "Hello WASM" to "How are you, WASM!?"</h1>
+<p>Check out <a href="https://onuralp-t.github.io/#article-2-how-to-wasm">my article</a> for a WASM introductory text. In this article, we'll be moving on from "Hello WASM" to "How are you, WASM!?"</p>
+<p>Or to state it more clearly: we'll look into how WASM works on a fundamental level.</p>
+<h1 id="art-3-the-wasm-module" class="article-heading"><a class="heading-anchor" href="#art-3-the-wasm-module" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-3-the-wasm-module')">&sect;</a>The WASM module</h1>
+<p>Before walking through how to include the WASM module into the web project, let's see what's inside the program that is going to be compiled into a WASM module in the first place.</p>
+<pre><code class="language-c">// main.c
+#include &lt;stdint.h&gt;
+
+// JS-defined:
+void wasm_log(const char *msg);
+
+constexpr uint32_t SCREEN_WIDTH = 800u;
+constexpr uint32_t SCREEN_HEIGHT = 600u;
+
+struct {
+  uint8_t pixels[SCREEN_WIDTH * SCREEN_HEIGHT * 4u];
+} screen;
+
+uint32_t screen_get_width(void)  { return SCREEN_WIDTH; }
+uint32_t screen_get_height(void) { return SCREEN_HEIGHT; }
+uint8_t* screen_get_pixels(void) { return screen.pixels; }
+uint32_t screen_get_pixels_size(void) { return SCREEN_WIDTH * SCREEN_HEIGHT * 4u; }
+
+void update(uint32_t frame_number) {
+    for (uint32_t y = 0u; y &lt; SCREEN_HEIGHT; y++)
+    {
+        for (uint32_t x = 0u; x &lt; SCREEN_WIDTH; x++)
+        {
+            uint32_t idx = (y * SCREEN_WIDTH + x) * 4u;
+            screen.pixels[idx + 0] = x + frame_number;
+            screen.pixels[idx + 1] = y + frame_number;
+            screen.pixels[idx + 2] = 150u;
+            screen.pixels[idx + 3] = 255u;
+        }
+    }
+    wasm_log("message from WASM update()!");
+}
+</code></pre>
+<p>Built with:</p>
+<pre><code class="language-bat">clang --target=wasm32 ^
+  -O2 ^
+  -std=c23 ^
+  -ffreestanding -nostdlib ^
+  -Wl,--no-entry ^
+  -Wl,--export-all ^
+  -Wl,--allow-undefined ^
+  -o main.wasm main.c
+</code></pre>
+<h2 id="art-3-using-js-functions-from-inside-our-wasm-module" class="article-heading"><a class="heading-anchor" href="#art-3-using-js-functions-from-inside-our-wasm-module" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-3-using-js-functions-from-inside-our-wasm-module')">&sect;</a>Using JS functions from inside our WASM module</h2>
+<p>At the very top, we see:</p>
+<pre><code class="language-c">void wasm_log(const char *msg);
+</code></pre>
+<p>This <code>wasm_log</code> function is only declared in <code>main.c</code>, not defined. Later, when we load the WASM module into our JS program, we'll define <code>wasm_long</code> inside JS. The <code>-Wl,--allow-undefined</code> CLI flag in our build command facilitates this.</p>
+<h2 id="art-3-accessing-wasm-variables-from-our-js-script" class="article-heading"><a class="heading-anchor" href="#art-3-accessing-wasm-variables-from-our-js-script" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-3-accessing-wasm-variables-from-our-js-script')">&sect;</a>Accessing WASM variables from our JS script</h2>
+<pre><code class="language-c">constexpr uint32_t SCREEN_WIDTH = 800u;
+constexpr uint32_t SCREEN_HEIGHT = 600u;
+
+struct {
+  uint8_t pixels[SCREEN_WIDTH * SCREEN_HEIGHT * 4u];
+} screen;
+</code></pre>
+<p>First two constants are defined using C23's <code>constexpr</code> qualifier to have type-checked constants in global scope, as alternative to macros or enums.</p>
+<p>When we do <code>console.log(wasm.exports)</code> later in our JS script, we will see <code>screen</code> but not our <code>SCREEN_WIDTH</code> and <code>SCREEN_HEIGHT</code> listed there.</p>
+<p>The <code>-Wl,--export-all</code> flag in our build command facilitates the export of all functions and objects, but this doesn't apply to simple variables.</p>
+<p>To solve this problem of not being able to access our variables from JS, we have few possible strategies in front of us. The first sensible option seems to be to pack our semantically related variables into a single struct (What I would do if I wasn't writing a WASM program).</p>
+<h3 id="art-3-the-correct-looking-solution" class="article-heading"><a class="heading-anchor" href="#art-3-the-correct-looking-solution" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-3-the-correct-looking-solution')">&sect;</a>The Correct-looking Solution</h3>
+<p>If we have a struct like this (defined again in global scope):</p>
+<pre><code class="language-c">#define WIDTH 800u
+#define HEIGHT 600u
+struct {
+  uint32_t SCREEN_WIDTH;
+  uint32_t SCREEN_HEIGHT;
+  uint8_t pixels[WIDTH * HEIGHT * 4u];
+} screen = {.SCREEN_WIDTH=WIDTH, .SCREEN_HEIGHT=HEIGHT};
+</code></pre>
+<ol>
+<li>Later when we load the WASM module into our JS script, we will see <code>screen</code> listed in the exports list.</li>
+<li>There, we will get a pointer to the base of the <code>screen</code> struct.</li>
+<li>Then, we will have to walk through each element of the struct while being mindful of the memory layout of our struct (memory padding!) and how big every element is, manually calculating the offsets to each element and casting/viewing them as the correct type.
+This is perfectly possible, yet error-prone. Why don't we just let Clang calculate the memory addresses for us?</li>
+</ol>
+<h3 id="art-3-the-correcter-solution" class="article-heading"><a class="heading-anchor" href="#art-3-the-correcter-solution" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-3-the-correcter-solution')">&sect;</a>The Correcter Solution</h3>
+<pre><code class="language-c">constexpr uint32_t SCREEN_WIDTH = 800u;
+constexpr uint32_t SCREEN_HEIGHT = 600u;
+
+struct {
+  uint8_t pixels[SCREEN_WIDTH * SCREEN_HEIGHT * 4u];
+} screen;
+
+uint32_t screen_get_width(void)  { return SCREEN_WIDTH; }
+uint32_t screen_get_height(void) { return SCREEN_HEIGHT; }
+uint8_t* screen_get_pixels(void) { return screen.pixels; }
+uint32_t screen_get_pixels_size(void) { return SCREEN_WIDTH * SCREEN_HEIGHT * 4u; }
+</code></pre>
+<p>Although getter functions get a bad rep, I think this is a good use case for them. Defining a getter function inside our WASM module offloads all the burden of memory calculations to the compiler, and gives us a human-readable and not-error-prone way of accessing our variables. These will most likely be used in the initialization part anyways, and they're not that bad even if they're used elsewhere.</p>
+<p>We can also use fancy attributes to steer our compiler to optimize them in a nicer way like:</p>
+<pre><code class="language-c">__attribute__((pure))
+uint32_t screen_get_width(void)  { return SCREEN_WIDTH; }
+</code></pre>
+<p>The <code>update</code> function is relatively simple, it just does some animation, you don't have to comprehend it in a deep way.</p>
+<h2 id="art-3-inside-javascript" class="article-heading"><a class="heading-anchor" href="#art-3-inside-javascript" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-3-inside-javascript')">&sect;</a>Inside JavaScript</h2>
+<pre><code class="language-js">const utf8_decoder = new TextDecoder("utf-8");
+function wasm_log(c_str) {
+	const str_start = c_str;
+	let str_end = str_start;
+	while (u8_view[str_end] !== 0) { // C's null terminated strings
+		str_end++;
+	}
+    const message = utf8_decoder.decode(u8_view.slice(str_start, str_end));
+    console.log(message);
+}
+  
+  const wasm_compiled = await WebAssembly.instantiateStreaming(
+    fetch("./main.wasm"),
+    {
+      env: { wasm_log }, // define what WASM module asks for
+    },
+);
+    const wasm = wasm_compiled.instance;
+    const we = wasm.exports;
+    console.log("wasm.exports: ", we);
+</code></pre>
+<p>In the <code>env</code> element, we put in the implementation of the <code>wasm_log</code> function we call from inside our WASM module, and we create some helper variables like <code>we</code> which indexes all our WASM exports. To access our WASM exports, we use the strategy we talked about earlier:</p>
+<pre><code class="language-js">function read_screen_from_wasm() {
+	const screen_width = we.screen_get_width();
+	const screen_height = we.screen_get_height();
+	const screen_pixels = new Uint8ClampedArray(we.memory.buffer, we.screen_get_pixels(), screen_width * screen_height * 4);
+	return { screen_width, screen_height, screen_pixels };
+}
+const { screen_width, screen_height, screen_pixels } = read_screen_from_wasm(we.screen);
+</code></pre>
+<p>We then resize our HTML canvas to the width/height we accessed from the WASM module:</p>
+<pre><code class="language-js">	const canvas = document.getElementById("canvas");
+	canvas.style.width = `${screen_width}px`;
+	canvas.style.height = `${screen_height}px`;
+	canvas.getContext("2d").scale(screen_width, screen_height);
+</code></pre>
+<p>After that, to write pixels to our canvas, we need to create a view into our <code>screen_pixels</code> array in the form of JavaScript's <code>ImageData</code> (we can only blit ImageData to canvas, we can't put screen_pixels to canvas directly):</p>
+<pre><code class="language-js">const imageData = new ImageData(screen_pixels, screen_width, screen_height);
+</code></pre>
+<p>And for the grand finale, we define what is essentially a rendering loop. We create the equivalent of a <code>while(true)</code> loop that updates the WASM memory with WASM functions, and then uses a view onto the WASM memory to blit it to our HTML canvas, and then repeat:</p>
+<pre><code class="language-js">	let frame = 0;
+	function loop() {
+    we.update(frame++); // update the screen_pixels data which lives in we.memory.buffer
+    ctx.putImageData(imageData, 0, 0); // imageData is a view on screen_pixels which is in we.memory.buffer
+    requestAnimationFrame(loop);
+	}
+	loop();
+</code></pre>
+
+        </div>
+      </article>
+
+      <article class="article-card" id="article-2-hello-wasm" data-order="2" data-title="Hello WASM, Hello SQLite, Hello everyone!">
+        <div class="article-body">
+<h1 id="art-2-hello-wasm-hello-sqlite-hello-everyone" class="article-heading"><a class="heading-anchor" href="#art-2-hello-wasm-hello-sqlite-hello-everyone" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-2-hello-wasm-hello-sqlite-hello-everyone')">&sect;</a>Hello WASM, Hello SQLite, Hello everyone!</h1>
 <p>This article will describe the workings of <a href="https://github.com/onuralp-t/hello-sqlite-wasm">this repo of mine</a>, and what is necessary to serve a static website on Github Pages that uses SQLite's WASM build; moving the high-level explanation from code comments to, hopefully, where it makes more sense.</p>
 <h1 id="art-2-before-we-even-start-cors-and-wasm" class="article-heading"><a class="heading-anchor" href="#art-2-before-we-even-start-cors-and-wasm" title="Copy link to section" onclick="copyHeadingUrl(event, 'art-2-before-we-even-start-cors-and-wasm')">&sect;</a>Before we even start: CORS and WASM</h1>
 <p>To load in WASM binaries, you need to be in a cross origin isolated context. Usually this is not a problem, but because I use Github Pages to host the website in my repo, and because Github doesn't give users enough control to set these kinds of headers, we need to fix this CORS issue in another way.</p>
@@ -271,10 +430,40 @@ EOF
     <aside class="sidebar-outline">
       <div class="sidebar-heading">Outline</div>
       <div class="outline-container" id="outline-container">
-        <div class="article-outline-block active" id="outline-art-2">
+        <div class="article-outline-block active" id="outline-art-3">
           <div class="outline-item level-1">
-            <a class="outline-link" href="#art-2-hello-sqlite-hello-wasm-hello-everyone">Hello SQLite, Hello WASM, Hello everyone</a>
-            <button class="outline-copy-btn" onclick="copyHeadingUrl(event, 'art-2-hello-sqlite-hello-wasm-hello-everyone')" title="Copy link to section">&#x2398;</button>
+            <a class="outline-link" href="#art-3-from-hello-wasm-to-how-are-you-wasm">From "Hello WASM" to "How are you, WASM!?"</a>
+            <button class="outline-copy-btn" onclick="copyHeadingUrl(event, 'art-3-from-hello-wasm-to-how-are-you-wasm')" title="Copy link to section">&#x2398;</button>
+          </div>
+          <div class="outline-item level-1">
+            <a class="outline-link" href="#art-3-the-wasm-module">The WASM module</a>
+            <button class="outline-copy-btn" onclick="copyHeadingUrl(event, 'art-3-the-wasm-module')" title="Copy link to section">&#x2398;</button>
+          </div>
+          <div class="outline-item level-2">
+            <a class="outline-link" href="#art-3-using-js-functions-from-inside-our-wasm-module">Using JS functions from inside our WASM module</a>
+            <button class="outline-copy-btn" onclick="copyHeadingUrl(event, 'art-3-using-js-functions-from-inside-our-wasm-module')" title="Copy link to section">&#x2398;</button>
+          </div>
+          <div class="outline-item level-2">
+            <a class="outline-link" href="#art-3-accessing-wasm-variables-from-our-js-script">Accessing WASM variables from our JS script</a>
+            <button class="outline-copy-btn" onclick="copyHeadingUrl(event, 'art-3-accessing-wasm-variables-from-our-js-script')" title="Copy link to section">&#x2398;</button>
+          </div>
+          <div class="outline-item level-3">
+            <a class="outline-link" href="#art-3-the-correct-looking-solution">The Correct-looking Solution</a>
+            <button class="outline-copy-btn" onclick="copyHeadingUrl(event, 'art-3-the-correct-looking-solution')" title="Copy link to section">&#x2398;</button>
+          </div>
+          <div class="outline-item level-3">
+            <a class="outline-link" href="#art-3-the-correcter-solution">The Correcter Solution</a>
+            <button class="outline-copy-btn" onclick="copyHeadingUrl(event, 'art-3-the-correcter-solution')" title="Copy link to section">&#x2398;</button>
+          </div>
+          <div class="outline-item level-2">
+            <a class="outline-link" href="#art-3-inside-javascript">Inside JavaScript</a>
+            <button class="outline-copy-btn" onclick="copyHeadingUrl(event, 'art-3-inside-javascript')" title="Copy link to section">&#x2398;</button>
+          </div>
+        </div>
+        <div class="article-outline-block" id="outline-art-2">
+          <div class="outline-item level-1">
+            <a class="outline-link" href="#art-2-hello-wasm-hello-sqlite-hello-everyone">Hello WASM, Hello SQLite, Hello everyone!</a>
+            <button class="outline-copy-btn" onclick="copyHeadingUrl(event, 'art-2-hello-wasm-hello-sqlite-hello-everyone')" title="Copy link to section">&#x2398;</button>
           </div>
           <div class="outline-item level-1">
             <a class="outline-link" href="#art-2-before-we-even-start-cors-and-wasm">Before we even start: CORS and WASM</a>
